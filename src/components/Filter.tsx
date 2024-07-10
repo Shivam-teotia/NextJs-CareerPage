@@ -14,7 +14,7 @@ import { option } from "../../interfaces";
 const Filter = ({ type, options }: { type: string; options: option[] }) => {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const { searchJobs } = useJob();
-  const { selectedItem, setSelectedItem } = useJob();
+  const { state, setState } = useJob();
   const item = options.map((option: option) => {
     return {
       label: option.label,
@@ -27,18 +27,36 @@ const Filter = ({ type, options }: { type: string; options: option[] }) => {
   );
   const handleFunction = async (e: React.FormEvent, value: string) => {
     e.preventDefault();
-    setSelectedItem((prev) => {
+    setState((prev) => {
       if (type === "country") {
-        return { ...prev, country: [...(prev.country || []), value] };
+        return {
+          ...prev,
+          selectedItem: {
+            ...state.selectedItem,
+            country: [...(state.selectedItem.country || []), value],
+          },
+        };
       } else if (type === "city") {
-        return { ...prev, city: [...(prev.city || []), value] };
+        return {
+          ...prev,
+          selectedItem: {
+            ...state.selectedItem,
+            city: [...(state.selectedItem.city || []), value],
+          },
+        };
       } else if (type === "role") {
-        return { ...prev, role: [...(prev.role || []), value] };
+        return {
+          ...prev,
+          selectedItem: {
+            ...state.selectedItem,
+            role: [...(state.selectedItem.role || []), value],
+          },
+        };
       }
       return prev;
     });
     // console.log(selectedItem);
-    const data = await searchJobs(selectedItem);
+    const data = await searchJobs(state.selectedItem);
     // console.log(data);
   };
   return (

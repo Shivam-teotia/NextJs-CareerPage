@@ -6,35 +6,53 @@ import { DropDownType, OptionsType } from "../../interfaces";
 import { useJob } from "@/context/JobFilter";
 const FilterBox: React.FC = () => {
   const [jobName, setjobName] = useState<string>("");
-  const { setSelectedItem, selectedItem } = useJob();
+  const { setState, state } = useJob();
   const removeFilter = (type: string, value: string) => {
     if (type === "jobName") {
-      setSelectedItem({ ...selectedItem, jobName: "" });
+      setState({
+        ...state,
+        selectedItem: { ...state.selectedItem, jobName: "" },
+      });
       setjobName("");
     } else if (type === "country") {
       const filteredArray =
-        selectedItem.country?.filter((item) => item !== value) ?? [];
-      setSelectedItem({ ...selectedItem, country: filteredArray });
+        state.selectedItem.country?.filter((item) => item !== value) ?? [];
+      setState({
+        ...state,
+        selectedItem: { ...state.selectedItem, country: filteredArray },
+      });
     } else if (type === "city") {
       const filteredArray =
-        selectedItem.city?.filter((item) => item !== value) ?? [];
-      setSelectedItem({ ...selectedItem, city: filteredArray });
+        state.selectedItem.city?.filter((item) => item !== value) ?? [];
+      setState({
+        ...state,
+        selectedItem: { ...state.selectedItem, city: filteredArray },
+      });
     } else if (type === "role") {
       const filteredArray =
-        selectedItem.role?.filter((item) => item !== value) ?? [];
-      setSelectedItem({ ...selectedItem, role: filteredArray });
+        state.selectedItem.role?.filter((item) => item !== value) ?? [];
+      setState({
+        ...state,
+        selectedItem: { ...state.selectedItem, role: filteredArray },
+      });
     }
   };
 
   const searchHandler = async (e: FormEvent) => {
     e.preventDefault();
 
-    setSelectedItem({ jobName: jobName });
+    setState({
+      ...state,
+      selectedItem: { ...state.selectedItem, jobName: jobName },
+    });
   };
   const resetHandler = (e: FormEvent) => {
     e.preventDefault();
     setjobName("");
-    setSelectedItem({ jobName: "", city: [], country: [], role: [] });
+    setState({
+      ...state,
+      selectedItem: { jobName: "", city: [], country: [], role: [] },
+    });
   };
   const [filterBoxComponents, setFilterBoxComponents] = useState<{
     dropDown: DropDownType[];
@@ -115,10 +133,10 @@ const FilterBox: React.FC = () => {
           })}
       </div>
       <div className="flex flex-wrap gap-3 p-0 mt-1">
-        {selectedItem && selectedItem.jobName && (
+        {state?.selectedItem && state?.selectedItem.jobName && (
           <>
             <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
-              <span>{selectedItem.jobName}</span>
+              <span>{state?.selectedItem.jobName}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
@@ -131,7 +149,7 @@ const FilterBox: React.FC = () => {
                 stroke-linejoin="round"
                 className="lucide lucide-x "
                 onClick={(e) =>
-                  removeFilter("jobName", selectedItem.jobName as string)
+                  removeFilter("jobName", state?.selectedItem.jobName as string)
                 }
               >
                 <path d="M18 6 6 18"></path>
@@ -140,8 +158,8 @@ const FilterBox: React.FC = () => {
             </div>
           </>
         )}
-        {selectedItem &&
-          selectedItem.city?.map((cityName) => {
+        {state?.selectedItem &&
+          state?.selectedItem.city?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
@@ -166,8 +184,8 @@ const FilterBox: React.FC = () => {
               </>
             );
           })}
-        {selectedItem &&
-          selectedItem.country?.map((cityName) => {
+        {state?.selectedItem &&
+          state?.selectedItem.country?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
@@ -192,8 +210,8 @@ const FilterBox: React.FC = () => {
               </>
             );
           })}
-        {selectedItem &&
-          selectedItem.role?.map((cityName) => {
+        {state?.selectedItem &&
+          state?.selectedItem.role?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">

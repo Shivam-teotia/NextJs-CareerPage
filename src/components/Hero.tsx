@@ -1,3 +1,4 @@
+"use serve";
 import Image from "next/image";
 import hero from "../../public/hero.svg";
 const Hero: React.FC = () => {
