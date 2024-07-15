@@ -9,12 +9,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useJob } from "@/context/JobFilter";
+// import { useJob } from "@/context/JobFilter";
 import { option } from "../../interfaces";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { setSelectedItem } from "@/redux/slice";
+import { fetchJobsRedux } from "@/redux/jobThunks";
 const Filter = ({ type, options }: { type: string; options: option[] }) => {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const { searchJobs } = useJob();
-  const { state, setState } = useJob();
+  const dispatch = useAppDispatch();
+  // const { searchJobs } = useJob();
+  // const { state, setState } = useJob();
+  const { selectedItem } = useAppSelector((state) => state.jobs);
   const item = options.map((option: option) => {
     return {
       label: option.label,
@@ -27,38 +32,63 @@ const Filter = ({ type, options }: { type: string; options: option[] }) => {
   );
   const handleFunction = async (e: React.FormEvent, value: string) => {
     e.preventDefault();
-    setState((prev) => {
-      if (type === "country") {
-        return {
-          ...prev,
-          selectedItem: {
-            ...state.selectedItem,
-            country: [...(state.selectedItem.country || []), value],
-          },
-        };
-      } else if (type === "city") {
-        return {
-          ...prev,
-          selectedItem: {
-            ...state.selectedItem,
-            city: [...(state.selectedItem.city || []), value],
-          },
-        };
-      } else if (type === "role") {
-        return {
-          ...prev,
-          selectedItem: {
-            ...state.selectedItem,
-            role: [...(state.selectedItem.role || []), value],
-          },
-        };
-      }
-      return prev;
-    });
+    if (type == "country") {
+      dispatch(
+        setSelectedItem({
+          ...selectedItem,
+          country: [...(selectedItem.country || []), value],
+        })
+      );
+    } else if (type == "city") {
+      dispatch(
+        setSelectedItem({
+          ...selectedItem,
+          city: [...(selectedItem.city || []), value],
+        })
+      );
+    } else if (type == "role") {
+      dispatch(
+        setSelectedItem({
+          ...selectedItem,
+          role: [...(selectedItem.role || []), value],
+        })
+      );
+    }
+    // setState((prev) => {
+    //   if (type === "country") {
+    //     return {
+    //       ...prev,
+    //       selectedItem: {
+    //         ...state.selectedItem,
+    //         country: [...(state.selectedItem.country || []), value],
+    //       },
+    //     };
+    //   } else if (type === "city") {
+    //     return {
+    //       ...prev,
+    //       selectedItem: {
+    //         ...state.selectedItem,
+    //         city: [...(state.selectedItem.city || []), value],
+    //       },
+    //     };
+    //   } else if (type === "role") {
+    //     return {
+    //       ...prev,
+    //       selectedItem: {
+    //         ...state.selectedItem,
+    //         role: [...(state.selectedItem.role || []), value],
+    //       },
+    //     };
+    //   }
+    //   return prev;
+    // });
     // console.log(selectedItem);
-    const data = await searchJobs(state.selectedItem);
+    // const data = await searchJobs(state.selectedItem);
     // console.log(data);
   };
+  React.useEffect(() => {
+    dispatch(fetchJobsRedux(selectedItem));
+  }, [selectedItem, dispatch]);
   return (
     <div className="w-1/3">
       <DropdownMenu>

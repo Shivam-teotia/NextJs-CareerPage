@@ -3,56 +3,45 @@ import React, { FormEvent, useEffect, useState } from "react";
 import { getKeys } from "@/services/JobService";
 import Filter from "./Filter";
 import { DropDownType, OptionsType } from "../../interfaces";
-import { useJob } from "@/context/JobFilter";
+// import { useJob } from "@/context/JobFilter";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { setSelectedItem, clearFilter } from "@/redux/slice";
+import { fetchJobsRedux } from "@/redux/jobThunks";
 const FilterBox: React.FC = () => {
+  const { selectedItem } = useAppSelector((state) => state.jobs);
+  const dispatch = useAppDispatch();
   const [jobName, setjobName] = useState<string>("");
-  const { setState, state } = useJob();
+  // const { setState, state } = useJob();
   const removeFilter = (type: string, value: string) => {
     if (type === "jobName") {
-      setState({
-        ...state,
-        selectedItem: { ...state.selectedItem, jobName: "" },
-      });
       setjobName("");
+      dispatch(setSelectedItem({ ...selectedItem, jobName: "" }));
     } else if (type === "country") {
       const filteredArray =
-        state.selectedItem.country?.filter((item) => item !== value) ?? [];
-      setState({
-        ...state,
-        selectedItem: { ...state.selectedItem, country: filteredArray },
-      });
+        selectedItem.country?.filter((item) => item !== value) ?? [];
+      dispatch(setSelectedItem({ ...selectedItem, country: filteredArray }));
     } else if (type === "city") {
       const filteredArray =
-        state.selectedItem.city?.filter((item) => item !== value) ?? [];
-      setState({
-        ...state,
-        selectedItem: { ...state.selectedItem, city: filteredArray },
-      });
+        selectedItem.city?.filter((item) => item !== value) ?? [];
+      dispatch(setSelectedItem({ ...selectedItem, city: filteredArray }));
     } else if (type === "role") {
       const filteredArray =
-        state.selectedItem.role?.filter((item) => item !== value) ?? [];
-      setState({
-        ...state,
-        selectedItem: { ...state.selectedItem, role: filteredArray },
-      });
+        selectedItem.role?.filter((item) => item !== value) ?? [];
+      dispatch(setSelectedItem({ ...selectedItem, role: filteredArray }));
     }
+    dispatch(fetchJobsRedux(selectedItem));
   };
 
   const searchHandler = async (e: FormEvent) => {
     e.preventDefault();
-
-    setState({
-      ...state,
-      selectedItem: { ...state.selectedItem, jobName: jobName },
-    });
+    dispatch(setSelectedItem({ ...selectedItem, jobName }));
+    dispatch(fetchJobsRedux({ ...selectedItem, jobName }));
   };
+
   const resetHandler = (e: FormEvent) => {
     e.preventDefault();
-    setjobName("");
-    setState({
-      ...state,
-      selectedItem: { jobName: "", city: [], country: [], role: [] },
-    });
+    dispatch(clearFilter());
+    dispatch(fetchJobsRedux(selectedItem));
   };
   const [filterBoxComponents, setFilterBoxComponents] = useState<{
     dropDown: DropDownType[];
@@ -133,10 +122,10 @@ const FilterBox: React.FC = () => {
           })}
       </div>
       <div className="flex flex-wrap gap-3 p-0 mt-1">
-        {state?.selectedItem && state?.selectedItem.jobName && (
+        {selectedItem && selectedItem.jobName && (
           <>
             <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
-              <span>{state?.selectedItem.jobName}</span>
+              <span>{selectedItem.jobName}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="14"
@@ -149,7 +138,7 @@ const FilterBox: React.FC = () => {
                 stroke-linejoin="round"
                 className="lucide lucide-x "
                 onClick={(e) =>
-                  removeFilter("jobName", state?.selectedItem.jobName as string)
+                  removeFilter("jobName", selectedItem.jobName as string)
                 }
               >
                 <path d="M18 6 6 18"></path>
@@ -158,8 +147,8 @@ const FilterBox: React.FC = () => {
             </div>
           </>
         )}
-        {state?.selectedItem &&
-          state?.selectedItem.city?.map((cityName) => {
+        {selectedItem &&
+          selectedItem.city?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
@@ -184,8 +173,8 @@ const FilterBox: React.FC = () => {
               </>
             );
           })}
-        {state?.selectedItem &&
-          state?.selectedItem.country?.map((cityName) => {
+        {selectedItem &&
+          selectedItem.country?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">
@@ -210,8 +199,8 @@ const FilterBox: React.FC = () => {
               </>
             );
           })}
-        {state?.selectedItem &&
-          state?.selectedItem.role?.map((cityName) => {
+        {selectedItem &&
+          selectedItem.role?.map((cityName) => {
             return (
               <>
                 <div className="border px-2.5 py-0.5 font-semibold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mt-2 flex cursor-pointer items-center gap-1 text-sm transition hover:bg-slate-100 bg-slate-200 text-slate-700 rounded-none">

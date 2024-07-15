@@ -11,9 +11,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { applyJob } from "@/services/JobService";
-import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
+import { useForm, SubmitHandler } from "react-hook-form";
 
+interface FormValues {
+  first_name: string;
+  last_name: string;
+  email: string;
+  contact_number: number;
+  resume: FileList | null;
+  acceptTerms: boolean;
+  declareApplication: boolean;
+}
 export function DialogDemo({
   open,
   setOpen,
@@ -26,38 +35,46 @@ export function DialogDemo({
   ownerId: string;
 }) {
   const { toast } = useToast();
-  const [formValues, setFormValues] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    resume: null,
-    acceptTerms: false,
-    declareApplication: false,
-  });
+  // const [formValues, setFormValues] = useState({
+  //   first_name: "",
+  //   last_name: "",
+  //   email: "",
+  //   phone: "",
+  //   resume: null,
+  //   acceptTerms: false,
+  //   declareApplication: false,
+  // });
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<FormValues>();
   const [loading, setLoading] = useState<boolean>(false);
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked, files } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]:
-        type === "checkbox" ? checked : type === "file" ? files?.[0] : value,
-    }));
-  };
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { name, value, type, checked, files } = e.target;
+  //   setFormValues((prevValues) => ({
+  //     ...prevValues,
+  //     [name]:
+  //       type === "checkbox" ? checked : type === "file" ? files?.[0] : value,
+  //   }));
+  // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit1 = async (data: FormValues) => {
+    console.log(data);
+    // console.log(data.resume?.length);
     const formData = new FormData();
     const formDataObject = {
-      first_name: formValues.first_name.trim(),
-      last_name: formValues.last_name.trim(),
-      email: formValues.email.trim(),
-      contact_number: formValues.phone?.trim(),
+      first_name: data.first_name.trim(),
+      last_name: data.last_name.trim(),
+      email: data.email.trim(),
+      contact_number: data.contact_number,
     };
     formData.append("candidate_data", JSON.stringify(formDataObject));
-    if (formValues.resume) {
-      formData.append("candidate_resume", formValues.resume as File);
+    if (data.resume?.length) {
+      formData.append("candidate_resume", data.resume[0]);
     }
+    console.log(formData.get("candidate_data"));
+    console.log(formData.get("candidate_resume"));
     setLoading(true);
     try {
       const data = await applyJob({
@@ -88,30 +105,35 @@ export function DialogDemo({
         <DialogHeader>
           <DialogTitle>Application Form</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col py-4 gap-2">
+        <form
+          onSubmit={handleSubmit(handleSubmit1)}
+          className="flex flex-col py-4 gap-2"
+        >
           <div className="flex gap-3">
             <div className="flex flex-col items-start gap-1">
               <Label htmlFor="first_name">First Name</Label>
               <Input
                 id="first_name"
-                name="first_name"
-                value={formValues.first_name}
-                onChange={handleInputChange}
+                // name="first_name"
+                // value={formValues.first_name}
+                // onChange={handleInputChange}
+                {...register("first_name", { required: true })}
                 className="focus:outline-none"
                 placeholder="First Name"
-                required
+                aria-invalid={errors.first_name ? "true" : "false"}
               />
             </div>
             <div className="flex flex-col items-start gap-1">
               <Label htmlFor="last_name">Last Name</Label>
               <Input
                 id="last_name"
-                name="last_name"
-                value={formValues.last_name}
-                onChange={handleInputChange}
+                // name="last_name"
+                // value={formValues.last_name}
+                // onChange={handleInputChange}
                 className="focus:outline-none"
+                {...register("last_name", { required: true })}
                 placeholder="Last Name"
-                required
+                aria-invalid={errors.last_name ? "true" : "false"}
               />
             </div>
           </div>
@@ -119,23 +141,25 @@ export function DialogDemo({
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
-              name="email"
+              // name="email"
               type="email"
-              value={formValues.email}
-              onChange={handleInputChange}
+              // value={formValues.email}
+              // onChange={handleInputChange}
               className="focus:outline-none"
-              required
+              {...register("email", { required: true })}
               placeholder="email@gmail.com"
+              aria-invalid={errors.email ? "true" : "false"}
             />
           </div>
           <div>
-            <Label htmlFor="phone">Phone No</Label>
+            <Label htmlFor="contact_number">Phone No</Label>
             <Input
-              id="phone"
-              name="phone"
+              id="contact_number"
+              // name="phone"
               type="number"
-              value={formValues.phone}
-              onChange={handleInputChange}
+              // value={formValues.phone}
+              // onChange={handleInputChange}
+              {...register("contact_number")}
               className="focus:outline-none"
               placeholder="Phone Number"
             />
@@ -145,8 +169,9 @@ export function DialogDemo({
             <Input
               type="file"
               id="resume"
-              name="resume"
-              onChange={handleInputChange}
+              // name="resume"
+              // onChange={handleInputChange}
+              {...register("resume")}
               className="focus:outline-none"
             />
           </div>
@@ -155,9 +180,10 @@ export function DialogDemo({
               <Input
                 type="checkbox"
                 id="acceptTerms"
-                name="acceptTerms"
-                checked={formValues.acceptTerms}
-                onChange={handleInputChange}
+                // name="acceptTerms"
+                // checked={formValues.acceptTerms}
+                // onChange={handleInputChange}
+                {...register("acceptTerms")}
                 className="w-3 focus:outline-none"
                 required
               />
@@ -167,9 +193,10 @@ export function DialogDemo({
               <Input
                 type="checkbox"
                 id="declareApplication"
-                name="declareApplication"
-                checked={formValues.declareApplication}
-                onChange={handleInputChange}
+                // name="declareApplication"
+                // checked={formValues.declareApplication}
+                // onChange={handleInputChange}
+                {...register("declareApplication")}
                 className="w-3 focus:outline-none"
                 required
               />
